@@ -1238,7 +1238,7 @@ var msJS = function(init_data){
 
     //add view loader
     function addViewLoader(cur_states){
-        $(cur_states.loader_target).prepend($(app.form_loader));
+        $(cur_states.loader_target).prepend(app.view_loader);
     }
 
     //prevent loader from clearing and removing

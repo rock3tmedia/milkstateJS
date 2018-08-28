@@ -8,7 +8,17 @@ module.exports = function(grunt) {
       },
       dist: {
         src: ['src/functions/**/*.js', 'src/app.js'],
-        dest: 'dist/milkstate.js'
+        dest: 'dist/milkstate.dev.js'
+      }
+    },
+    uglify: {
+      options: {
+        banner: '<!-- date here -->'
+      },
+      dist: {
+        files: {
+          'dist/milkstate.min.js': ['dist/milkstate.dev.js']
+        }
       }
     },
     obfuscator: {
@@ -17,21 +27,11 @@ module.exports = function(grunt) {
         },
         task1: {
             files: {
-                'dist/milkstateObf.js': [
-                    'dist/milkstate.js'
+                'dist/milkstate.obf.min.js': [
+                    'milkstate.min.js'
                 ]
             }
         }
-    },
-    uglify: {
-      options: {
-        banner: '<!-- date here -->'
-      },
-      dist: {
-        files: {
-          'dist/milkstate.min.js': ['dist/milkstateObf.js']
-        }
-      }
     },
     jshint: {
       files: ['gruntfile.js', 'src/functions/**/*.js', 'src/app.js'],
@@ -45,9 +45,6 @@ module.exports = function(grunt) {
           document: true
         }
       }
-    },
-    clean: {
-      js: ['dist/milkstate.js','dist/milkstateObf.js']
     },
     watch: {
       files: ['<%= jshint.files %>'],
@@ -71,6 +68,6 @@ module.exports = function(grunt) {
   grunt.registerTask('css', ['less']);
 
   //concat(comebine files) and minify
-  grunt.registerTask('minify', ['concat', 'obfuscator', 'uglify', 'clean']);
+  grunt.registerTask('minify', ['concat', 'obfuscator', 'uglify']);
 
 };
