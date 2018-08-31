@@ -48,7 +48,7 @@ module.exports = function(grunt) {
     },
     watch: {
       files: ['<%= jshint.files %>'],
-      tasks: ['jshint']
+      tasks: ['dev']
     }
   });
 
@@ -69,5 +69,8 @@ module.exports = function(grunt) {
 
   //concat(comebine files) and minify
   grunt.registerTask('minify', ['concat', 'obfuscator', 'uglify']);
+
+  //concat(comebine files) and minify
+  grunt.registerTask('dev', ['concat']);
 
 };

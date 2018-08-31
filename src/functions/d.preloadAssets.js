@@ -1,9 +1,9 @@
 //this script loads the style sheets using a deferred promise
-var preloadAssets = function (css,js,states) {
+var preloadAssets = function (css,js,img,states) {
 
     //check if state is section
     var class_type = "";
-    if(states.view_type == 'section'){
+    if(states != undefined && states.view_type == 'section'){
         class_type = 'sec';
     }
 
@@ -57,7 +57,7 @@ var preloadAssets = function (css,js,states) {
                             case 'script':
                             element.type = 'text/javascript';
                             element.className = "pre_jsxrq"+class_type+"";
-                            element.async = true;
+                            //element.async = true;
                             break;
                             case 'link':
                             element.type = 'text/css';
@@ -78,7 +78,9 @@ var preloadAssets = function (css,js,states) {
                         switch(tag) {
                             case 'script':
                             //send to iframe to start loading
-                            asset_head = window.frames["asset-loader"].document.getElementsByTagName("HEAD")[0];         
+                            //asset_head = window.frames["asset-loader"].document.getElementsByTagName("HEAD")[0];         
+                            
+                            asset_head = document.getElementsByTagName("HEAD")[0];
                             asset_head.appendChild(element);
                             break;
                             case 'link':

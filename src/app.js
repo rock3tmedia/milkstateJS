@@ -4,12 +4,27 @@ var msJS = function(init_data){
 
     //app data
     app = {
-        json_views: "/views/views.json",
+        app_name: "",
+        json_views: "",
         win_loc: "",
         addToApp: function() {
 
+            //check for app name
+            if(init_data.app_name == undefined){
+                app.app_name = "milkstateApp";
+            }else{
+                app.app_name = init_data.app_name;
+            }
+
+            //check for app name
+            if(init_data.views == undefined){
+                app.json_views = "views/views.json";
+            }else{
+                app.json_views = init_data.json_views;
+            }
+
             //check if win_loc is defined or not
-            if(init_data == undefined){
+            if(init_data.win_loc == undefined){
                 app.win_loc = window.location.pathname.replace(/^\/|\/$/g, '');
             }else{
                 app.win_loc = init_data.win_loc;
@@ -49,11 +64,16 @@ var msJS = function(init_data){
         addToState: function() { 
 
             //check if win_loc is defined or not and set defaults
-            if(init_data == undefined || init_data == ""){
+            if(init_data.load_type == undefined){
                 view_state.load_type = "view";
-                view_state.view_type = "all";
             }else{
                 view_state.load_type = init_data.load_type;
+            }
+
+            //check if win_loc is defined or not and set defaults
+            if(init_data.view_type == undefined){
+                view_state.view_type = "all";
+            }else{
                 view_state.view_type = init_data.view_type;
             }
         },
@@ -79,15 +99,15 @@ var msJS = function(init_data){
     var loader_timeout;
 
     //get templates then run app
-    $.when($.get('/templates/app.view.htm'),
-        $.get('/templates/app.view-loader.htm'),
-        $.get('/templates/app.form-loader.htm')
+    $.when($.get('templates/app.view.htm'),
+        $.get('templates/app.view-loader.htm'),
+        $.get('templates/app.form-loader.htm')
     ).then(function(vt,vl,fl) {
 
         //set templates
-        app.template = vt;
-        app.view_loader = vl;
-        app.form_loader = fl;
+        app.template = vt[0];
+        app.view_loader = vl[0];
+        app.form_loader = fl[0];
 
         //start app
         runApp();
@@ -122,6 +142,22 @@ var msJS = function(init_data){
         //set default view type
         if(cur_states.view_target == undefined){
             cur_states.view_target = "body";
+        }
+
+        //put data into an array
+        var init_url_data = cur_states.view_link.split('/');
+
+        //get first location(directory)
+        var init_first_loc = init_url_data[0];
+
+        //set default view if empty
+        if(init_first_loc == app.app_name){
+
+            //remove first data
+            init_url_data.shift();
+
+            //join back to create url
+            cur_states.view_link = init_url_data.join('/');
         }
 
         //if not initial load - view_data_loc is undefined otherwise
@@ -236,7 +272,7 @@ var msJS = function(init_data){
 
             //add
             $('<iframe>')
-            .attr('src','/views/asset-loader.php')
+            .attr('src','templates/asset-loader.php')
             .attr('height',0)
             .attr('width',0)
             .attr('border',0)
@@ -271,10 +307,11 @@ var msJS = function(init_data){
         var data_url = "";
 
         //get api info
-        return $.getJSON('/data/@api.php').then(function(rq_api_data){
+        return $.getJSON('api/@api.php').then(function(rq_api_data){
 
             var api_data = rq_api_data[0];
 
+            //get views
             return $.getJSON(app.json_views).then(function(rq_json_data){
 
                 //set json
@@ -365,11 +402,11 @@ var msJS = function(init_data){
         var url_data = data.split('/');
 
         //get first location(directory)
-        var view_loc = url_data[0];
+        var first_loc = url_data[0];
 
         //set default view if empty
-        if(view_loc == ""){
-            view_loc = "home";
+        if(first_loc == ""){
+            first_loc = "home";
         }
 
         //remove first data (will always be main view)
@@ -380,7 +417,7 @@ var msJS = function(init_data){
 
         //data to return
         var urlObject = {};
-        urlObject["view_location"] = view_loc;
+        urlObject["view_location"] = first_loc;
         urlObject["url_data"] = url_data;
         urlObject["url_data_count"] = url_data_count;
 
@@ -665,7 +702,7 @@ var msJS = function(init_data){
             app.app_idle = true;
             runApp(pop_status.cur_states);
         }else{
-
+            
             //load with promise
             //we use get instead of getjson because getjson doesnt receive empty values
             $.when(preloadAssets(view_css,view_js,null,cur_states),
@@ -673,7 +710,7 @@ var msJS = function(init_data){
                 $.Deferred(function(deferred) {
                     $(deferred.resolve);
                 })
-            ).then(function(css,js,loaded_url_data) {
+            ).then(function(assets,loaded_url_data) {
 
                 //add disabled css to head after preloading in iframe -
                 //because disabled stylesheets can not be preloaded
@@ -694,18 +731,7 @@ var msJS = function(init_data){
                 });
 
                 //add js to head after preloading in iframe
-                $.each(view_js, function(i, item) {
-
-                    //css script
-                    var loaded_js = item;
-
-                    //create script
-                    var script = document.createElement("script");
-                    script.type = "text/javascript";
-                    script.href = loaded_js;
-                    script.className = 'pre_jsxrq';
-                    head.appendChild(script);
-                });
+                console.log(view_js);
 
                 //get new view data
                 var loaded_view_data = loaded_url_data[0];
@@ -763,6 +789,7 @@ var msJS = function(init_data){
                     loadViewContentData(view_template_content_data,append_data,null,error_state,get_data,cur_states).then(function(template_data) {
 
                         //prepend template data
+                        console.log(appTemplate);
                         appTemplate.prepend(template_data);
 
                     }).then(function() {
