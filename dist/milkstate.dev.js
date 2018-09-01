@@ -1,4 +1,291 @@
-//start
+//convert youtube time
+function convert_time(duration) {
+    var a = duration.match(/\d+/g);
+    if (duration.indexOf('M') >= 0 && duration.indexOf('H') == -1 && duration.indexOf('S') == -1) {
+        a = [0, a[0], 0];
+    }
+    if (duration.indexOf('H') >= 0 && duration.indexOf('M') == -1) {
+        a = [a[0], 0, a[1]];
+    }
+    if (duration.indexOf('H') >= 0 && duration.indexOf('M') == -1 && duration.indexOf('S') == -1) {
+        a = [a[0], 0, 0];
+    }
+    duration = 0;
+    if (a.length == 3) {
+        duration = duration + parseInt(a[0]) * 3600;
+        duration = duration + parseInt(a[1]) * 60;
+        duration = duration + parseInt(a[2]);
+    }
+    if (a.length == 2) {
+        duration = duration + parseInt(a[0]) * 60;
+        duration = duration + parseInt(a[1]);
+    }
+    if (a.length == 1) {
+        duration = duration + parseInt(a[0]);
+    }
+    var h = Math.floor(duration / 3600);
+    var m = Math.floor(duration % 3600 / 60);
+    var s = Math.floor(duration % 3600 % 60);
+    return ((h > 0 ? h + ":" + (m < 10 ? "0" : "") : "") + m + ":" + (s < 10 ? "0" : "") + s);
+};//check devices
+$(function() {
+    if(jQuery.browser.mobile){
+        $('body').addClass('is-mob');
+    }else{
+        $('body').addClass('is-desk');
+    }
+});;function countProperties(obj) {
+    var count = 0;
+
+    for(var prop in obj) {
+        if(obj.hasOwnProperty(prop))
+            ++count;
+    }
+
+    return count;
+};//gets an object by using a string
+// jshint ignore: start
+function getObjByValue(path, origin) {
+    if (origin === void 0 || origin === null) origin = self ? self : this;
+    if (typeof path !== 'string') path = '' + path;
+    var c, pc, i = 0, n = path.length, name = '', q;
+    while (i<=n)
+        ((c = path[i++]) == '.' || c == '[' || c == ']' || c == "'" || c == '"' || c == void 0) ? (c==q&&path[i]==']'?q='':q?name+=c:name?(origin?origin=origin[name]:i=n+2,name='') : (pc=='['&&(c=='"'||c=="'")?q=c:pc=='.'||pc=='['||pc==']'&&c==']'||pc=='"'||pc=="'"?i=n+2:void 0), pc=c) : name += c;
+    if (i==n+2 || name) throw "Invalid path: "+path;
+    return origin;
+};//if value is in array
+function isInArray(value, array) {
+
+	//check if array exists
+	if(array !== undefined){
+	  return array.indexOf(value) > -1;
+	}
+};//check if string is in string
+function startsWith(str, word) {
+    return str.lastIndexOf(word, 0) === 0;
+};//this script loads the style sheets using a deferred promise
+var preloadAssets = function (css,js,img,states) {
+
+    //check if state is section
+    var class_type = "";
+    if(states != undefined && states.view_type == 'section'){
+        class_type = 'sec';
+    }
+
+    //star asset loading
+    var loadAssets = (function() {
+
+        //loading function
+        function _load(tag) {
+
+            //data to return to promise array
+            return function(data) {
+
+                //each file
+                $.each(data, function(i, item) {
+
+                    //get url for item
+                    var url = item;
+
+                    var element = "";
+
+                    // This promise will be used by Promise.all to determine success or failure
+                    return new Promise(function(resolve, reject) {
+
+                        //create assets
+                        switch(tag) {
+                            case 'img':
+                            element = new Image();
+                            break;
+                            case 'script':
+                            element = document.createElement(tag);
+                            break;
+                            case 'link':
+                            element = document.createElement(tag);
+                            break;
+                        }
+                        
+                        //attr
+                        var parent = 'body';
+                        var attr = 'src';
+
+                        // Important success and error for the promise
+                        element.onload = function() {
+                            resolve(url);
+                        };
+                        element.onerror = function() {
+                            reject(url);
+                        };
+
+                        //define
+                        switch(tag) {
+                            case 'script':
+                            element.type = 'text/javascript';
+                            element.className = "pre_jsxrq"+class_type+"";
+                            //element.async = true;
+                            break;
+                            case 'link':
+                            element.type = 'text/css';
+                            element.rel = 'stylesheet';
+                            element.className = 'pre_cssxrq';
+                            attr = 'href';
+                            parent = 'head';
+                            break;
+                        }
+
+                        //update url
+                        element[attr] = url;
+
+                        //define asset head
+                        var asset_head = "";
+
+                        //create assets
+                        switch(tag) {
+                            case 'script':
+                            //send to iframe to start loading
+                            //asset_head = window.frames["asset-loader"].document.getElementsByTagName("HEAD")[0];         
+                            
+                            asset_head = document.getElementsByTagName("HEAD")[0];
+                            asset_head.appendChild(element);
+                            break;
+                            case 'link':
+                            //send to iframe to start loading
+                            asset_head = window.frames["asset-loader"].document.getElementsByTagName("HEAD")[0];         
+                            asset_head.appendChild(element);
+                            break;
+                        }
+                    });
+                });
+            };
+        }
+      
+        //set types
+        return {
+            css: _load('link'),
+            js: _load('script'),
+            img: _load('img')
+        };
+    })();
+
+    //load file types
+    Promise.all([
+        loadAssets.js(js), 
+        loadAssets.css(css),
+        loadAssets.img(img)
+    ]).then(function() {
+        //console.log('Assets Loaded');
+    }).catch(function() {
+        //console.log('Error loading assets.');
+    });
+};;//remove form loader
+function removeFormLoader(loader,delay){
+
+    //fade loader out
+    loader.animate({
+        'opacity' : 0
+    }, delay);
+
+    //delay removal to allow animation
+    var pop_loader_rm = setTimeout(function(){
+        loader.remove();
+    }, delay);
+};//remove popblock
+function removePopblock(popblock,delay){
+
+    //check delay
+    if(delay == undefined){
+        delay = 300;
+    }
+
+    //animate success out
+    popblock.animate({
+        'opacity' : 0
+    }, delay);
+
+    //set timeout so success state can be viewed
+    var pop_rm = setTimeout(function(){
+
+        //remove popblock
+        popblock.remove();
+    }, delay + 100);
+};//resize window event, because jquery's doesnt work as intended
+function resizeWindow(){
+    var evt = window.document.createEvent('UIEvents'); 
+    evt.initUIEvent('resize', true, false, window, 0); 
+    window.dispatchEvent(evt);
+};//in view by Ryan Snooks - Jan 2018
+function inScrollView(thisY){
+
+	//reset objects
+	var inViewObjs = [];
+
+	//get in view objects
+	$(".in_view").each(function(i){
+
+		//store
+		inViewObjs[i] = $(this);
+	});
+
+	//get height of container
+	var scrollheight = $('#main-container').outerHeight();
+
+	//for each object
+	var i;
+	for (i = 0; i < inViewObjs.length; ++i) {
+
+		//get objects offset
+	    var objOffset = inViewObjs[i].offset().top;
+
+		//get objects height
+	    var objHeight = inViewObjs[i].outerHeight();
+
+	    //get difference from containing div
+	    var scrollDif = scrollheight - objOffset;
+
+	    //get data attributes
+	    var objHasTarget = false;
+	    var objTarget = inViewObjs[i].attr('data-in-view-target');
+		if (typeof objTarget !== typeof undefined && objTarget !== false) {
+		    objHasTarget = true;
+		}
+
+	    //check
+	    if (scrollDif > 0 && scrollDif < objHeight + scrollheight){
+	    //is in view
+
+	    	//check if view has been active(seen) yet
+	    	if(!inViewObjs[i].hasClass('is_active_view')){
+	    		inViewObjs[i].addClass('is_active_view');
+	    	}
+
+	    	//if in view and does not have class, add class
+	    	if(!inViewObjs[i].hasClass('is_in_view')){
+	    		inViewObjs[i].addClass('is_in_view');
+	    		inViewObjs[i].removeClass('is_not_in_view');
+
+	    		//check for target
+	    		if(objHasTarget){
+	    			$('#'+objTarget).addClass('is_in_view');
+	    			$('#'+objTarget).removeClass('is_not_in_view');
+	    		}
+	    	}
+	    }else{
+	    //not in view
+
+	    	//if in view, add class
+	    	if(inViewObjs[i].hasClass('is_in_view')){
+	    		inViewObjs[i].removeClass('is_in_view');
+	    		inViewObjs[i].addClass('is_not_in_view');
+
+	    		//check for target
+	    		if(objHasTarget){
+	    			$('#'+objTarget).removeClass('is_in_view');
+	    			$('#'+objTarget).addClass('is_not_in_view');
+	    		}
+	    	}
+	    }
+	}
+};//start
 /*jshint sub:true*/
 var msJS = function(init_data){
 
